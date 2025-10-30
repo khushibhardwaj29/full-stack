@@ -1,0 +1,94 @@
+// 1. app.js (Main Entry Point)//
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const studentRoutes = require("./routes/studentRoutes");
+
+const app = express();
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
+
+// Database Connection
+mongoose.connect("mongodb://localhost:27017/studentDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ MongoDB Connected"))
+.catch(err => console.log("❌ Connection Error:", err));
+
+// Routes
+app.use("/", studentRoutes);
+
+// Server
+app.listen(3000, () => console.log("🚀 Server running at http://localhost:3000"));
+// 2. models/studentModel.js//
+const mongoose = require("mongoose");
+
+const studentSchema = new mongoose.Schema({
+  name: String,
+  age: Number,
+  marks: Number
+});
+
+module.exports = mongoose.model("Student", studentSchema);
+// 3. controllers/studentController.js//
+const Student = require("../models/studentModel");
+
+// Display all students
+exports.getAllStudents = async (req, res) => {
+  const students = await Student.find();
+  res.render("index", { students });
+};
+
+// Add new student
+exports.addStudent = async (req, res) => {
+  const { name, age, marks } = req.body;
+  const newStudent = new Student({ name, age, marks });
+  await newStudent.save();
+  res.redirect("/");
+};
+
+// Delete student by ID
+exports.deleteStudent = async (req, res) => {
+  await Student.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+};
+//4. routes/studentRoutes.js//
+const express = require("express");
+const router = express.Router();
+const controller = require("../controllers/studentController");
+
+router.get("/", controller.getAllStudents);
+router.post("/add", controller.addStudent);
+router.get("/delete/:id", controller.deleteStudent);
+
+module.exports = router;
+//5. views/index.ejs//
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management System</title>
+</head>
+<body>
+  <h1> Student Management System</h1>
+
+  <form action="/add" method="POST">
+    <input type="text" name="name" placeholder="Enter Name" required>
+    <input type="number" name="age" placeholder="Enter Age" required>
+    <input type="number" name="marks" placeholder="Enter Marks" required>
+    <button type="submit">Add Student</button>
+  </form>
+
+  <h2>All Students</h2>
+  <ul>
+    <% students.forEach(student => { %>
+      <li>
+        <%= student.name %> - <%= student.age %> years - Marks: <%= student.marks %>
+        <a href="/delete/<%= student._id %>">🗑 Delete</a>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>
