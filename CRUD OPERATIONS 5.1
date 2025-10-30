@@ -1,0 +1,68 @@
+// CRUD Operations using Mongoose
+// Filename: productCRUD.js
+
+const mongoose = require("mongoose");
+
+// 1. Connect to MongoDB
+mongoose.connect("mongodb://localhost:27017/productDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB"))
+.catch(err => console.log("❌ Connection Error:", err));
+
+// 2. Define Schema
+const productSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  category: String
+});
+
+// 3. Create Model
+const Product = mongoose.model("Product", productSchema);
+
+// 4. CREATE Operation
+async function createProduct() {
+  const product = new Product({
+    name: "Laptop",
+    price: 65000,
+    category: "Electronics"
+  });
+  const result = await product.save();
+  console.log("Product Created:", result);
+}
+
+// 5. READ Operation
+async function readProducts() {
+  const products = await Product.find();
+  console.log("All Products:", products);
+}
+
+// 6. UPDATE Operation
+async function updateProduct(id) {
+  const result = await Product.updateOne(
+    { _id: id },
+    { $set: { price: 70000 } }
+  );
+  console.log("Update Result:", result);
+}
+
+// 7. DELETE Operation
+async function deleteProduct(id) {
+  const result = await Product.deleteOne({ _id: id });
+  console.log("Delete Result:", result);
+}
+
+// Execute Operations
+async function runCRUD() {
+  await createProduct();
+  await readProducts();
+  const sample = await Product.findOne();
+  if (sample) {
+    await updateProduct(sample._id);
+    await deleteProduct(sample._id);
+  }
+  mongoose.connection.close();
+}
+
+runCRUD();
