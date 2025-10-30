@@ -1,0 +1,64 @@
+// Switch to database
+use ecommerceDB;
+
+// 1. Insert Products with Nested Documents
+db.products.insertMany([
+  {
+    productId: 101,
+    name: "Wireless Bluetooth Headphones",
+    brand: "SoundX",
+    price: 2499,
+    category: {
+      main: "Electronics",
+      sub: "Audio Devices"
+    },
+    specifications: {
+      color: "Black",
+      batteryLife: "20 Hours",
+      connectivity: "Bluetooth 5.3",
+      warranty: "1 Year"
+    },
+    reviews: [
+      { user: "Khushi", rating: 5, comment: "Excellent sound quality!" },
+      { user: "Aman", rating: 4, comment: "Comfortable and great battery life." }
+    ]
+  },
+  {
+    productId: 102,
+    name: "Smartwatch FitPro 2",
+    brand: "FitPro",
+    price: 3999,
+    category: {
+      main: "Electronics",
+      sub: "Wearables"
+    },
+    specifications: {
+      color: "Pink",
+      batteryLife: "7 Days",
+      display: "AMOLED",
+      waterResistant: true
+    },
+    reviews: [
+      { user: "Simran", rating: 4, comment: "Stylish and useful for workouts!" },
+      { user: "Rohan", rating: 5, comment: "Value for money smartwatch." }
+    ]
+  }
+]);
+
+// 2. Read: Retrieve all products
+db.products.find().pretty();
+
+// 3. Update: Change price of a product
+db.products.updateOne(
+  { productId: 101 },
+  { $set: { price: 2299 } }
+);
+
+// 4. Add a new review to an existing product
+db.products.updateOne(
+  { productId: 102 },
+  { $push: { reviews: { user: "Neha", rating: 5, comment: "Amazing performance!" } } }
+);
+
+// 5. Delete: Remove a product
+db.products.deleteOne({ productId: 101 });
